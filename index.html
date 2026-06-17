@@ -1,24 +1,275 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Message from Wiynuh</title>
-    <link rel="stylesheet" href="style.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f3d0d7;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── CONFETTI CANVAS ── */
+        #confetti-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── WRAPPER ── */
+        .wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 40px 20px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        /* ── TITLE ── */
+        .question {
+            font-size: 28px;
+            font-weight: bold;
+            color: #e94d58;
+            text-align: center;
+            opacity: 0;
+            animation: fadeInDown 0.8s ease 0.2s forwards;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── GIF ── */
+        .gif-wrap {
+            opacity: 0;
+            animation: zoomIn 0.7s ease 0.5s forwards;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(233, 77, 88, 0.25);
+            border: 4px solid rgba(255,255,255,0.8);
+        }
+
+        .gif-wrap img {
+            width: 280px;
+            display: block;
+        }
+
+        /* ── BUTTONS ── */
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            opacity: 0;
+            animation: fadeInUp 0.7s ease 0.9s forwards;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-yes, .btn-no {
+            padding: 14px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-yes {
+            background: #e94d58;
+            color: white;
+            box-shadow: 0 4px 15px rgba(233, 77, 88, 0.45);
+        }
+
+        .btn-yes:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(233, 77, 88, 0.5);
+        }
+
+        .btn-no {
+            background: white;
+            color: #e94d58;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: fixed; /* untuk efek kabur */
+        }
+
+        .btn-no:hover {
+            transform: translateY(-3px);
+        }
+
+        /* ── FLOATING HEARTS ── */
+        .hearts {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .heart {
+            position: absolute;
+            bottom: -40px;
+            font-size: 20px;
+            opacity: 0;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0%   { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+            100% { transform: translateY(-100vh) rotate(20deg); opacity: 0; }
+        }
+
+        /* ── KEYFRAMES ── */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        /* ── PULSE on gif setelah load ── */
+        .gif-wrap.loaded {
+            animation: zoomIn 0.7s ease 0.5s forwards,
+            pulse 2.5s ease 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50%       { transform: scale(1.02); }
+        }
+    </style>
 </head>
 <body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- floating hearts -->
+    <div class="hearts" id="hearts"></div>
+
     <audio autoplay loop>
         <source src="birthdaysong.mp3" type="audio/mpeg" />
-        Your browser does not support the audio element.
     </audio>
-<div class="wrapper">
-    <h2 class="question">Happy Birthday sayangg</h2>
-    <img src="Birthday.gif" alt="" />
-    <div class="btn-group">
-        <button><a href="yes.html" class="yes-btn">yes</a></button>
-        <button class="no-btn">No</button>
+
+    <div class="wrapper">
+        <h1 class="question">Happy Birthday sayangg 🎂</h1>
+
+        <div class="gif-wrap" id="gifWrap">
+            <img src="Birthday.gif" alt="Happy Birthday" id="gifImg" />
+        </div>
+
+        <div class="btn-group">
+            <a href="yes.html" class="btn-yes">Yes 🥰</a>
+            <button class="btn-no" id="noBtn">No 🙈</button>
+        </div>
     </div>
-</div>
-<script src="script.js"></script>
+
+    <script>
+        // ── TOMBOL NO KABUR ──
+        const noBtn = document.getElementById('noBtn');
+
+        noBtn.addEventListener('mouseover', () => {
+            const maxX = window.innerWidth  - noBtn.offsetWidth  - 20;
+            const maxY = window.innerHeight - noBtn.offsetHeight - 20;
+            noBtn.style.left = Math.floor(Math.random() * maxX) + 'px';
+            noBtn.style.top  = Math.floor(Math.random() * maxY) + 'px';
+        });
+
+        // ── FLOATING HEARTS ──
+        const heartsEl = document.getElementById('hearts');
+        const symbols  = ['💕','💖','🌸','✨','💗','🎀','💝'];
+
+        function spawnHeart() {
+            const h = document.createElement('span');
+            h.classList.add('heart');
+            h.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+            h.style.left     = Math.random() * 100 + 'vw';
+            h.style.fontSize = (14 + Math.random() * 18) + 'px';
+            const dur        = 5 + Math.random() * 6;
+            h.style.animationDuration = dur + 's';
+            h.style.animationDelay   = Math.random() * 3 + 's';
+            heartsEl.appendChild(h);
+            setTimeout(() => h.remove(), (dur + 3) * 1000);
+        }
+
+        setInterval(spawnHeart, 600);
+        for (let i = 0; i < 8; i++) spawnHeart();
+
+        // ── CONFETTI ──
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx    = canvas.getContext('2d');
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+        window.addEventListener('resize', () => {
+            canvas.width  = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        const colors = ['#e94d58','#f9a8b8','#ffd6e0','#fff','#ffb3c1','#ff8fab','#fb6f92'];
+        const pieces = Array.from({length: 80}, () => ({
+            x:   Math.random() * canvas.width,
+            y:   Math.random() * canvas.height - canvas.height,
+            r:   3 + Math.random() * 5,
+            d:   1 + Math.random() * 2,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            tilt: Math.random() * 10 - 5,
+            tiltAngle: 0,
+            tiltSpeed: 0.05 + Math.random() * 0.1
+        }));
+
+        function drawConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            pieces.forEach(p => {
+                p.tiltAngle += p.tiltSpeed;
+                p.y += p.d;
+                p.tilt = Math.sin(p.tiltAngle) * 12;
+                if (p.y > canvas.height) {
+                    p.y = -10;
+                    p.x = Math.random() * canvas.width;
+                }
+                ctx.beginPath();
+                ctx.lineWidth = p.r;
+                ctx.strokeStyle = p.color;
+                ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                ctx.stroke();
+            });
+            requestAnimationFrame(drawConfetti);
+        }
+
+        drawConfetti();
+
+        // pulse gif setelah load
+        document.getElementById('gifImg').addEventListener('load', () => {
+            document.getElementById('gifWrap').classList.add('loaded');
+        });
+    </script>
 </body>
 </html>
